@@ -51,7 +51,7 @@ Step 1: Start the system
 
 From the solution root folder:
 
-docker compose up --build
+- docker compose up --build
 
 This will start:
 - ProductService: http://localhost:5185/swagger
@@ -101,11 +101,11 @@ Stopping the System
 
 To stop containers:
 
-docker compose down
+- docker compose down
 
 To stop containers and delete all data:
 
-docker compose down -v
+- docker compose down -v
 
 --------------------------------------------------
 
