@@ -106,8 +106,8 @@ Add HTTP header:
 Authorization: Bearer <jwt-token>
 
 Example:
-POST http://localhost:5000/products
-POST http://localhost:5000/orders
+- POST http://localhost:5000/products
+- POST http://localhost:5000/orders
 
 Without token:
 - Request will return 401 Unauthorized
