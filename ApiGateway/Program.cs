@@ -33,6 +33,8 @@ builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

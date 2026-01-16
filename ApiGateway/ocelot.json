@@ -1,4 +1,13 @@
 {
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:5000",
+    "RateLimitOptions": {
+      "DisableRateLimitHeaders": false,
+      "QuotaExceededMessage": "Too many requests. Please try again later.",
+      "HttpStatusCode": 429,
+      "ClientIdHeader": "ClientId"
+    }
+  },
   "Routes": [
     {
       "DownstreamPathTemplate": "/api/products",
@@ -16,6 +25,11 @@
       },
       "AddHeadersToRequest": {
         "Authorization": "{Authorization}"
+      },
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "Limit": 5
       }
     },
     {
@@ -34,6 +48,11 @@
       },
       "AddHeadersToRequest": {
         "Authorization": "{Authorization}"
+      },
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "Limit": 3
       }
     }
   ]
