@@ -1,13 +1,19 @@
 Online Order Microservices System - .NET 8
 
-This project demonstrates a production-grade microservices architecture built using ASP.NET Core (.NET 8) with the following features:
+This project demonstrates a production-grade microservices architecture built using ASP.NET Core (.NET 8) with modern enterprise patterns such as API Gateway, JWT Authentication, Event-driven communication, and fault tolerance.
 
-- Clean Architecture
-- Independent microservices
-- SQL Server (Docker)
-- RabbitMQ messaging
-- Polly fault tolerance
-- Event-driven design
+--------------------------------------------------
+
+Key Features
+
+- Clean Architecture per microservice
+- API Gateway using Ocelot
+- Centralized JWT Authentication
+- Secure inter-service communication
+- SQL Server per service (Docker)
+- RabbitMQ event-driven messaging
+- Polly retry and circuit breaker
+- Startup resiliency for RabbitMQ consumers
 - Docker Compose orchestration
 - Persistent SQL data using Docker volumes
 
@@ -16,15 +22,38 @@ This project demonstrates a production-grade microservices architecture built us
 System Architecture
 
 Services:
-- ProductService - manages products
-- OrderService - places orders and communicates with ProductService
-- InventoryService - listens to order events and updates inventory
-- SQL Server - database per service
-- RabbitMQ - asynchronous messaging
+- ApiGateway        : Single entry point for clients
+- AuthService       : Issues JWT tokens
+- ProductService    : Manages products
+- OrderService      : Places orders and validates product availability
+- InventoryService  : Consumes order events and updates stock
+- SQL Server        : Database per service
+- RabbitMQ          : Asynchronous messaging
 
 Flow:
-Client -> OrderService -> ProductService
-OrderService -> RabbitMQ -> InventoryService
+Client
+  -> ApiGateway
+      -> AuthService (Login / Token)
+      -> ProductService
+      -> OrderService
+          -> ProductService (JWT propagated)
+          -> RabbitMQ
+              -> InventoryService
+
+--------------------------------------------------
+
+Service Ports
+
+- API Gateway     : http://localhost:5000
+- ProductService  : http://localhost:5001/swagger
+- OrderService    : http://localhost:5002/swagger
+- InventoryService: http://localhost:5003/swagger
+- AuthService     : http://localhost:5004/swagger
+- RabbitMQ UI     : http://localhost:15672
+
+RabbitMQ credentials:
+- Username: guest
+- Password: guest
 
 --------------------------------------------------
 
@@ -34,6 +63,8 @@ Tech Stack
 - Entity Framework Core
 - SQL Server 2022 (Docker)
 - RabbitMQ
+- Ocelot API Gateway
+- JWT Authentication
 - Polly (Retry and Circuit Breaker)
 - Docker and Docker Compose
 - Clean Architecture
@@ -45,7 +76,7 @@ Running the Application with Docker
 Prerequisites:
 - Docker Desktop
 - .NET SDK 8
-- SQL Server Management Studio (optional for viewing database)
+- SQL Server Management Studio (optional)
 
 Step 1: Start the system
 
@@ -53,13 +84,33 @@ From the solution root folder:
 
 - docker compose up --build
 
-This will start:
-- ProductService: http://localhost:5185/swagger
-- OrderService: http://localhost:5141/swagger
-- InventoryService: http://localhost:5150/swagger
-- RabbitMQ UI: http://localhost:15672
-  username: guest
-  password: guest
+All services will start automatically with proper dependency handling.
+
+--------------------------------------------------
+
+Authentication Flow (JWT)
+
+Step 1: Generate JWT token
+
+POST http://localhost:5004/api/auth/login
+
+Response:
+{
+  "token": "<jwt-token>"
+}
+
+Step 2: Call APIs via Gateway
+
+Add HTTP header:
+
+Authorization: Bearer <jwt-token>
+
+Example:
+POST http://localhost:5000/products
+POST http://localhost:5000/orders
+
+Without token:
+- Request will return 401 Unauthorized
 
 --------------------------------------------------
 
@@ -81,19 +132,24 @@ SQL data is stored persistently in Docker volume named: sql_data
 
 --------------------------------------------------
 
-Test Flow
+End-to-End Test Flow
 
-1. Create a product
-2. Create an order
-3. InventoryService automatically updates stock using RabbitMQ events
+1. Generate JWT token using AuthService
+2. Create product via ApiGateway
+3. Create order via ApiGateway
+4. OrderService validates product availability
+5. OrderService publishes OrderCreated event
+6. InventoryService consumes event and updates stock
 
 --------------------------------------------------
 
-Fault Tolerance
+Fault Tolerance and Resiliency
 
 - HTTP calls protected with Polly retry and circuit breaker
-- Asynchronous messaging with RabbitMQ
-- Fully containerized deployment
+- RabbitMQ consumers retry connection on startup
+- Manual ACK/NACK for message processing
+- Docker restart policy enabled for consumers
+- Fully containerized and production-ready setup
 
 --------------------------------------------------
 
@@ -113,4 +169,4 @@ Author
 
 Surendra Maurya
 Senior .NET Full Stack Developer
-Microservices, AWS, Docker, Clean Architecture
+Microservices, .NET, Docker, AWS, Clean Architecture

@@ -26,7 +26,7 @@ services:
     depends_on:
       - sqlserver
     ports:
-      - "5185:80"
+      - "5001:80"
 
   orderservice:
     build:
@@ -37,7 +37,7 @@ services:
       - rabbitmq
       - productservice
     ports:
-      - "5141:80"
+      - "5002:80"
 
   inventoryservice:
     build:
@@ -46,8 +46,25 @@ services:
     depends_on:
       - sqlserver
       - rabbitmq
+    restart: always
     ports:
-      - "5150:80"
+      - "5003:80"
+  apigateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    depends_on:
+      - productservice
+      - orderservice
+      - inventoryservice
+    ports:
+      - "5000:8080"
+  authservice:
+    build:
+      context: .
+      dockerfile: AuthService.API/Dockerfile
+    ports:
+      - "5004:80"
 
 volumes:
   sql_data:

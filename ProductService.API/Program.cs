@@ -1,10 +1,13 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ProductService.Application.Interfaces;
 using ProductService.Application.Services;
 using ProductService.Application.Validators;
 using ProductService.Infrastructure.Data;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +27,26 @@ builder.Services.AddScoped<IProductService, ProductService.Application.Services.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "OnlineOrder.Auth",
+            ValidAudience = "OnlineOrder.Clients",
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes("VerySecretKeyForOnlineOrderSystem"))
+        };
+    });
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Global Exception Handling
 app.UseExceptionHandler(errorApp =>

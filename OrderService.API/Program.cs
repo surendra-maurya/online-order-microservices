@@ -1,6 +1,8 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using OrderService.Application.Clients;
 using OrderService.Application.Interfaces;
 using OrderService.Application.Services;
@@ -8,6 +10,7 @@ using OrderService.Application.Validators;
 using OrderService.Infrastructure.Data;
 using Polly;
 using Polly.Extensions.Http;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +27,7 @@ builder.Services.AddScoped<IOrderService, OrderService.Application.Services.Orde
 // Polly + HTTP Product Service Client
 //builder.Services.AddHttpClient<IProductClient, ProductClient>(client =>
 //{
-//    client.BaseAddress = new Uri("http://localhost:5185"); // Product API URL
+//    client.BaseAddress = new Uri("http://localhost:5001"); // Product API URL
 //})
 //.AddTransientHttpErrorPolicy(p => p.WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(2)));
 
@@ -38,6 +41,7 @@ var circuitBreakerPolicy = HttpPolicyExtensions
         handledEventsAllowedBeforeBreaking: 5,
         durationOfBreak: TimeSpan.FromSeconds(30)
     );
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddHttpClient<IProductClient, ProductClient>(client =>
 {
@@ -52,8 +56,27 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<OrderEventPublisher>();
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "OnlineOrder.Auth",
+            ValidAudience = "OnlineOrder.Clients",
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes("VerySecretKeyForOnlineOrderSystem"))
+        };
+    });
 
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseExceptionHandler(a => a.Run(async ctx =>
 {

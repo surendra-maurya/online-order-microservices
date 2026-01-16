@@ -34,6 +34,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "ApiGateway\ApiGateway.csproj", "{BDE60E20-B712-44D2-B493-C9089FFD619C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService.API", "AuthService.API\AuthService.API.csproj", "{D6496132-040C-4B19-AC2B-931936CD7F1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,6 +92,14 @@ Global
 		{F67A7846-6F0A-4433-A28F-2C31216125E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F67A7846-6F0A-4433-A28F-2C31216125E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F67A7846-6F0A-4433-A28F-2C31216125E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDE60E20-B712-44D2-B493-C9089FFD619C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDE60E20-B712-44D2-B493-C9089FFD619C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDE60E20-B712-44D2-B493-C9089FFD619C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDE60E20-B712-44D2-B493-C9089FFD619C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6496132-040C-4B19-AC2B-931936CD7F1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6496132-040C-4B19-AC2B-931936CD7F1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6496132-040C-4B19-AC2B-931936CD7F1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6496132-040C-4B19-AC2B-931936CD7F1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
