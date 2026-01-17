@@ -2,9 +2,24 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Serilog;
+using Serilog.Context;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, config) =>
+{
+    config
+        .MinimumLevel.Information()
+        .Enrich.FromLogContext()
+        .Enrich.WithEnvironmentName()
+        .Enrich.WithMachineName()
+        .Enrich.WithProperty("ServiceName", "ApiGateService")
+        .WriteTo.Console()
+        .WriteTo.Seq("http://seq:80");
+});
+
 
 builder.Configuration
     .SetBasePath(builder.Environment.ContentRootPath)
@@ -32,6 +47,18 @@ builder.Services.AddAuthorization();
 builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
+
+app.Use(async (context, next) =>
+{
+    var correlationId = Guid.NewGuid().ToString();
+    context.Items["CorrelationId"] = correlationId;
+
+    LogContext.PushProperty("CorrelationId", correlationId);
+    context.Response.Headers.Add("X-Correlation-Id", correlationId);
+
+    await next();
+});
+
 
 app.UseRouting();
 

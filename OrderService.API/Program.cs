@@ -10,9 +10,23 @@ using OrderService.Application.Validators;
 using OrderService.Infrastructure.Data;
 using Polly;
 using Polly.Extensions.Http;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, config) =>
+{
+    config
+        .MinimumLevel.Information()
+        .Enrich.FromLogContext()
+        .Enrich.WithEnvironmentName()
+        .Enrich.WithMachineName()
+        .Enrich.WithProperty("ServiceName", "OrderService")
+        .WriteTo.Console()
+        .WriteTo.Seq("http://seq:80");
+});
+
 
 builder.Services.AddControllers();
 

@@ -1,9 +1,23 @@
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Host.UseSerilog((context, config) =>
+{
+    config
+        .MinimumLevel.Information()
+        .Enrich.FromLogContext()
+        .Enrich.WithEnvironmentName()
+        .Enrich.WithMachineName()
+        .Enrich.WithProperty("ServiceName", "AuthService")
+        .WriteTo.Console()
+        .WriteTo.Seq("http://seq:80");
+});
+
 
 var jwt = builder.Configuration.GetSection("Jwt");
 

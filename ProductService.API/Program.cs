@@ -7,9 +7,23 @@ using ProductService.Application.Interfaces;
 using ProductService.Application.Services;
 using ProductService.Application.Validators;
 using ProductService.Infrastructure.Data;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, config) =>
+{
+    config
+        .MinimumLevel.Information()
+        .Enrich.FromLogContext()
+        .Enrich.WithEnvironmentName()
+        .Enrich.WithMachineName()
+        .Enrich.WithProperty("ServiceName", "ProductService")
+        .WriteTo.Console()
+        .WriteTo.Seq("http://seq:80");
+});
+
 
 builder.Services.AddControllers();
 
