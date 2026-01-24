@@ -24,6 +24,13 @@ builder.Host.UseSerilog((context, config) =>
         .WriteTo.Seq("http://seq:80");
 });
 
+//builder.Services.AddHealthChecks()
+//    .AddSqlServer(
+//        builder.Configuration.GetConnectionString("ProductDb"));
+
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ProductDbContext>();
+
 
 builder.Services.AddControllers();
 
@@ -76,4 +83,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
+
 app.Run();

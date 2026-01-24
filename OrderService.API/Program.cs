@@ -27,6 +27,9 @@ builder.Host.UseSerilog((context, config) =>
         .WriteTo.Seq("http://seq:80");
 });
 
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<OrderDbContext>();
+
 
 builder.Services.AddControllers();
 
@@ -100,6 +103,6 @@ app.UseExceptionHandler(a => a.Run(async ctx =>
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.MapHealthChecks("/health");
 app.MapControllers();
 app.Run();

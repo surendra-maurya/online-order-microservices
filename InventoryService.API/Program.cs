@@ -1,9 +1,12 @@
 using InventoryService.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using RabbitMQ.Client;
 using Serilog;
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,17 @@ builder.Host.UseSerilog((context, config) =>
         .WriteTo.Seq("http://seq:80");
 });
 
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<InventoryDbContext>()
+    .AddRabbitMQ(sp =>
+    {
+        var factory = new ConnectionFactory
+        {
+            HostName = "rabbitmq"
+        };
+
+        return factory.CreateConnectionAsync();
+    });
 
 builder.Services.AddDbContext<InventoryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("InventoryDb")));
@@ -61,6 +75,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapHealthChecks("/health");
 
 app.Run();
 

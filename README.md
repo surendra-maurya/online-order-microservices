@@ -152,6 +152,28 @@ Fault Tolerance and Resiliency
 - Fully containerized and production-ready setup
 
 --------------------------------------------------
+Health Checks
+
+Each service exposes health endpoints to monitor dependencies:
+
+Database health
+
+RabbitMQ connectivity
+
+Application liveness
+
+Example:
+-GET http://localhost:5001/health
+-GET http://localhost:5002/health
+-GET http://localhost:5003/health
+
+Healthy response:
+
+{
+  "status": "Healthy"
+}
+
+--------------------------------------------------
 
 Stopping the System
 
