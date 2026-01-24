@@ -163,9 +163,9 @@ RabbitMQ connectivity
 Application liveness
 
 Example:
--GET http://localhost:5001/health
--GET http://localhost:5002/health
--GET http://localhost:5003/health
+- GET http://localhost:5001/health
+- GET http://localhost:5002/health
+- GET http://localhost:5003/health
 
 Healthy response:
 
