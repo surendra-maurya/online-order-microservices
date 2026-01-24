@@ -187,6 +187,6 @@ To stop containers and delete all data:
 
 Author
 
-Surendra Maurya
-Senior .NET Full Stack Developer
+Surendra Maurya | 
+Senior .NET Full Stack Developer | 
 Microservices, .NET, Docker, AWS, Clean Architecture
