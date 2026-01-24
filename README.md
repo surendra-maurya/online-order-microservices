@@ -156,11 +156,9 @@ Health Checks
 
 Each service exposes health endpoints to monitor dependencies:
 
-Database health
-
-RabbitMQ connectivity
-
-Application liveness
+- Database health
+- RabbitMQ connectivity
+- Application liveness
 
 Example:
 - GET http://localhost:5001/health
