@@ -40,6 +40,9 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("OrderDb")));
 
 builder.Services.AddScoped<IOrderService, OrderService.Application.Services.OrderService>();
+builder.Services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
+builder.Services.AddSingleton<OrderEventPublisher>();
+
 
 // Polly + HTTP Product Service Client
 //builder.Services.AddHttpClient<IProductClient, ProductClient>(client =>

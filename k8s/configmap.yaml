@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: online-order-config
+  namespace: online-order
+  labels:
+    app.kubernetes.io/part-of: online-order-system
+data:
+  ASPNETCORE_ENVIRONMENT: Production
+  SQL_SERVER: sqlserver
+  SQL_PORT: "1433"
+  RABBITMQ_HOST: rabbitmq
+  RABBITMQ_PORT: "5672"
+  SEQ_URL: http://seq:80
+  rabbitmq.conf: |
+    # This preserves the application's existing guest/guest RabbitMQ client settings.
+    # Use a non-guest application account before deploying outside a local learning cluster.
+    loopback_users.guest = false

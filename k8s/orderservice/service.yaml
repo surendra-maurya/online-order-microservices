@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderservice
+  namespace: online-order
+  labels: { app.kubernetes.io/name: orderservice, app.kubernetes.io/part-of: online-order-system }
+spec:
+  selector: { app.kubernetes.io/name: orderservice }
+  ports: [{ name: http, port: 80, targetPort: http }]

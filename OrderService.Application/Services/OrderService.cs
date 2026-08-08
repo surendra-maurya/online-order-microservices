@@ -1,4 +1,5 @@
-﻿using OrderService.Application.Clients;
+﻿using Microsoft.Extensions.Logging;
+using OrderService.Application.Clients;
 using OrderService.Application.DTOs;
 using OrderService.Application.Interfaces;
 using OrderService.Domain.Entities;
@@ -11,49 +12,53 @@ public class OrderService : IOrderService
     private readonly IProductClient _productClient;
     private readonly OrderDbContext _db;
     private readonly OrderEventPublisher _publisher;
+    private readonly ILogger<OrderService> _logger;
 
-    public OrderService(IProductClient productClient,
-                        OrderDbContext db,
-                        OrderEventPublisher publisher)
+    public OrderService(
+        IProductClient productClient,
+        OrderDbContext db,
+        OrderEventPublisher publisher,
+        ILogger<OrderService> logger)
     {
         _productClient = productClient;
         _db = db;
         _publisher = publisher;
+        _logger = logger;
     }
-
 
     public async Task<int> CreateOrderAsync(CreateOrderDto dto)
     {
-        try
-        {
-            var available = await _productClient
+        // Validate product availability (sync communication)
+        var available = await _productClient
             .IsProductAvailableAsync(dto.ProductId, dto.Quantity);
 
-            if (!available)
-                throw new Exception("Product not available");
+        if (!available)
+            throw new InvalidOperationException("Product not available");
 
-            var order = new Order
-            {
-                ProductId = dto.ProductId,
-                Quantity = dto.Quantity,
-                CreatedAt = DateTime.UtcNow
-            };
+        // Create order (local transaction)
+        var order = new Order
+        {
+            ProductId = dto.ProductId,
+            Quantity = dto.Quantity,
+            CreatedAt = DateTime.UtcNow,
+            Status = OrderStatus.Pending
+        };
 
-            _db.Orders.Add(order);
-            await _db.SaveChangesAsync();
+        _db.Orders.Add(order);
+        await _db.SaveChangesAsync(); // DB COMMIT FIRST
 
-            _publisher.PublishOrderCreated(new
-            {
-                order.Id,
-                order.ProductId,
-                order.Quantity,
-                order.CreatedAt
-            });
+        _logger.LogInformation(
+            "Order {OrderId} created successfully. Publishing OrderCreated event.",
+            order.Id);
 
-            return order.Id;
-        }
-        catch (Exception ex) {
-            throw ex;
-        }
+        // Publish event AFTER successful DB commit (Saga start)
+        await _publisher.PublishOrderCreatedAsync(new
+        {
+            OrderId = order.Id,
+            ProductId = order.ProductId,
+            Quantity = order.Quantity
+        });
+
+        return order.Id;
     }
 }

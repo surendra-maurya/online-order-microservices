@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: seq
+  namespace: online-order
+  labels:
+    app.kubernetes.io/name: seq
+    app.kubernetes.io/part-of: online-order-system
+spec:
+  selector:
+    app.kubernetes.io/name: seq
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

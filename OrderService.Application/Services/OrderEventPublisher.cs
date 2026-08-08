@@ -1,44 +1,73 @@
-﻿using RabbitMQ.Client;
+﻿using Microsoft.Extensions.Logging;
+using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 
 namespace OrderService.Application.Services;
 
-public class OrderEventPublisher
+public class OrderEventPublisher : IAsyncDisposable
 {
-    private readonly IConnection _connection;
-    private readonly IChannel _channel;
+    private readonly ILogger<OrderEventPublisher> _logger;
+    private readonly ConnectionFactory _factory;
 
-    public OrderEventPublisher()
+    private IConnection? _connection;
+    private IChannel? _channel;
+
+    public OrderEventPublisher(ILogger<OrderEventPublisher> logger)
     {
-        var factory = new ConnectionFactory
+        _logger = logger;
+
+        _factory = new ConnectionFactory
         {
             HostName = "rabbitmq"
         };
+    }
 
-        // 7.x API
-        _connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
-        _channel = _connection.CreateChannelAsync().GetAwaiter().GetResult();
+    private async Task EnsureConnectedAsync()
+    {
+        if (_connection != null && _connection.IsOpen &&
+            _channel != null && _channel.IsOpen)
+            return;
 
-        _channel.QueueDeclareAsync(
+        _logger.LogInformation("Connecting to RabbitMQ...");
+
+        _connection = await _factory.CreateConnectionAsync();
+        _channel = await _connection.CreateChannelAsync();
+
+        await _channel.QueueDeclareAsync(
             queue: "order-created",
             durable: true,
             exclusive: false,
             autoDelete: false,
             arguments: null
-        ).GetAwaiter().GetResult();
+        );
+
+        _logger.LogInformation("RabbitMQ publisher connected.");
     }
 
-    public void PublishOrderCreated(object order)
+    public async Task PublishOrderCreatedAsync(object order)
     {
+        await EnsureConnectedAsync();
+
         var json = JsonSerializer.Serialize(order);
         var body = Encoding.UTF8.GetBytes(json);
 
-        _channel.BasicPublishAsync(
+        await _channel!.BasicPublishAsync(
             exchange: "",
             routingKey: "order-created",
             mandatory: false,
             body: body
-        ).GetAwaiter().GetResult();
+        );
+
+        _logger.LogInformation("OrderCreated event published.");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_channel != null)
+            await _channel.CloseAsync();
+
+        if (_connection != null)
+            await _connection.CloseAsync();
     }
 }
