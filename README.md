@@ -278,10 +278,10 @@ Run this in a dedicated PowerShell window and leave it running:
 kubectl port-forward service/apigateway 5000:80 -n online-order
 ```
 
-In Postman, request a token first:
+In Postman, request a token through the Gateway first:
 
 - Method: `POST`
-- URL: `http://localhost:5004/api/auth/login` (after forwarding AuthService below)
+- URL: `http://localhost:5000/auth/login`
 
 Then call the Gateway:
 
@@ -310,17 +310,7 @@ Order body example:
 }
 ```
 
-### Step 5: expose AuthService directly
-
-Run this in another PowerShell window:
-
-```powershell
-kubectl port-forward service/authservice 5004:80 -n online-order
-```
-
-This makes `POST http://localhost:5004/api/auth/login` available to Postman. Keep the window open while testing.
-
-### Step 6: access individual APIs
+### Step 5: access individual APIs
 
 Use a separate port-forward window for each API you want to call directly:
 
