@@ -8,6 +8,9 @@
 **/.toolstarget
 **/.vs
 **/.vscode
+**/.agents
+**/.codex
+**/.github
 **/*.*proj.user
 **/*.dbmdl
 **/*.jfm
@@ -19,6 +22,8 @@
 **/node_modules
 **/npm-debug.log
 **/obj
+**/TestResults
+**/k8s
 **/secrets.dev.yaml
 **/values.dev.yaml
 LICENSE

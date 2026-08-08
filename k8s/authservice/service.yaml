@@ -5,5 +5,6 @@ metadata:
   namespace: online-order
   labels: { app.kubernetes.io/name: authservice, app.kubernetes.io/part-of: online-order-system }
 spec:
+  type: ClusterIP
   selector: { app.kubernetes.io/name: authservice }
   ports: [{ name: http, port: 80, targetPort: http }]
