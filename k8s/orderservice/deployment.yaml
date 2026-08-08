@@ -27,6 +27,30 @@ spec:
             - name: ASPNETCORE_URLS
               value: http://+:80
 
+            - name: RabbitMQ__Host
+              valueFrom:
+                configMapKeyRef:
+                  name: online-order-config
+                  key: RABBITMQ_HOST
+
+            - name: RabbitMQ__Port
+              valueFrom:
+                configMapKeyRef:
+                  name: online-order-config
+                  key: RABBITMQ_PORT
+
+            - name: RabbitMQ__UserName
+              valueFrom:
+                secretKeyRef:
+                  name: online-order-secrets
+                  key: rabbitmq-username
+
+            - name: RabbitMQ__Password
+              valueFrom:
+                secretKeyRef:
+                  name: online-order-secrets
+                  key: rabbitmq-password
+
             - name: SQL_SERVER
               valueFrom:
                 configMapKeyRef:

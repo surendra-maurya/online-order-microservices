@@ -28,7 +28,10 @@ builder.Services.AddHealthChecks()
     {
         var factory = new ConnectionFactory
         {
-            HostName = "rabbitmq"
+            HostName = builder.Configuration["RabbitMQ:Host"] ?? "rabbitmq",
+            Port = int.TryParse(builder.Configuration["RabbitMQ:Port"], out var port) ? port : 5672,
+            UserName = builder.Configuration["RabbitMQ:UserName"] ?? "guest",
+            Password = builder.Configuration["RabbitMQ:Password"] ?? "guest"
         };
 
         return factory.CreateConnectionAsync();

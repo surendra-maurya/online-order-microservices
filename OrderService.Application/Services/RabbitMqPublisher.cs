@@ -1,4 +1,5 @@
 ﻿using OrderService.Application.Interfaces;
+using Microsoft.Extensions.Configuration;
 using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
@@ -9,11 +10,14 @@ namespace OrderService.Application.Services
     {
         private readonly ConnectionFactory _factory;
 
-        public RabbitMqPublisher()
+        public RabbitMqPublisher(IConfiguration configuration)
         {
             _factory = new ConnectionFactory
             {
-                HostName = "rabbitmq"
+                HostName = configuration["RabbitMQ:Host"] ?? "rabbitmq",
+                Port = int.TryParse(configuration["RabbitMQ:Port"], out var port) ? port : 5672,
+                UserName = configuration["RabbitMQ:UserName"] ?? "guest",
+                Password = configuration["RabbitMQ:Password"] ?? "guest"
             };
         }
 
@@ -30,10 +34,17 @@ namespace OrderService.Application.Services
 
             var body = Encoding.UTF8.GetBytes(
                 JsonSerializer.Serialize(message));
+            var properties = new BasicProperties
+            {
+                Persistent = true,
+                ContentType = "application/json"
+            };
 
             await channel.BasicPublishAsync(
                 exchange: "",
                 routingKey: queueName,
+                mandatory: false,
+                basicProperties: properties,
                 body: body);
         }
     }
